@@ -1,19 +1,31 @@
-import { View, Text, TextInput, StyleSheet, 
+import { View, Text, Alert,TextInput, StyleSheet, 
     TouchableOpacity} from 'react-native'
 
 import { Link, router } from 'expo-router'
 import { useState } from 'react'
+import { signInWithEmailAndPassword } from 'firebase/auth'
 
+import { auth } from '../../config'
 import Button from '../../components/Button'
 
-const handlePress = ():void =>{
+const handlePress = (email:string, password: string):void =>{
   // ログイン処理の実装
+  signInWithEmailAndPassword(auth, email, password)
+  .then((userCredential) => {
+    console.log(userCredential.user.uid)
     router.replace('/memo/list')
+  })
+  .catch((error) => {
+    const { code,message} = error
+    console.log(code, message)
+    Alert.alert(message)
+    
+  })
 }
 
 const Login = ():JSX.Element => {
     const [email, setEmail] = useState('')
-    const [passwword, setPassword] = useState('')
+    const [password, setPassword] = useState('')
     return (
         <View style = {styles.container}>
             <View style = {styles.inner}>
@@ -29,17 +41,17 @@ const Login = ():JSX.Element => {
                     />
                 <TextInput 
                     style={styles.input} 
-                    value={passwword}
+                    value={password}
                     onChangeText={(text)=> {setPassword(text)}}
                     autoCapitalize='none'
                     secureTextEntry
                     placeholder='Password'
                     textContentType='password'
                     />
-                <Button label = 'Submit'  onPress={handlePress} />
+                <Button label = 'Submit'  onPress={() => {handlePress(email, password)} }/>
                 <View style={styles.footer}>
                     <Text style = {styles.footerText}>Not regsteres?</Text>
-                    <Link href = '/auth/sign_up' asChild>
+                    <Link href = '/auth/sign_up' asChild replace>
                     <TouchableOpacity>
                     <Text style = {styles.footerLink}>Sign up here!</Text>
                     </TouchableOpacity>
